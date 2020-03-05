@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:share/share.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 import 'gifPage.dart';
 
@@ -18,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   Future<Map> _getGifs() async {
     http.Response response;
 
-    if (_search == null) {
+    if (_search == null || _search.isEmpty) {
       response = await http.get("https://api.giphy.com/v1/gifs/trending?api_key=Z4HjK2aM54pw8tUZB1iYFnnoDdGhNJIY&limit=20&rating=G");
     } else {
       response = await http.get("https://api.giphy.com/v1/gifs/search?api_key=Z4HjK2aM54pw8tUZB1iYFnnoDdGhNJIY&q=$_search&limit=19&offset=$_offset&rating=G&lang=en");
@@ -47,21 +48,11 @@ class _HomePageState extends State<HomePage> {
       itemBuilder: (context, index) {
         if (_search == null || index < snapshot.data["data"].length) {
           return GestureDetector(
-            child: Image.network(
-              snapshot.data["data"][index]["images"]["fixed_height"]["url"],
+            child: FadeInImage.memoryNetwork(
+              image: snapshot.data["data"][index]["images"]["fixed_height"]["url"],
               height: 300.0,
               fit: BoxFit.cover,
-              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
-              if (loadingProgress == null) return child;
-                return Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null ? 
-                          loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                          : null,
-                    backgroundColor: Colors.white60,
-                  ),
-                );
-              },
+              placeholder: kTransparentImage,
             ),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(
